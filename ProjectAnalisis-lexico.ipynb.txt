@@ -1,0 +1,164 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPzjjDLznWN31s4xG62kjWI",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/dreuxx/AI-Writer/blob/main/ProjectAnalisis-lexico.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hXYHxsnkk5Bn",
+        "outputId": "120b7366-21f7-4e67-b54c-ec457f0f6286"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Writing leer.py\n"
+          ]
+        }
+      ],
+      "source": [
+        "%%writefile leer.py\n",
+        "1Pencil = 1\n",
+        "2Pencil = 1Pencil x2\n",
+        "if 1box is 1 then\n",
+        "Pencil-box = 2Pencil+ 1box ~ 1Pencil\n",
+        "else\n",
+        "print 2Pencil"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import re\n",
+        "\n",
+        "file = open(\"leer.py\")\n",
+        "\n",
+        "op = {\n",
+        "    '=' : 'OP: =',\n",
+        "    '+' : 'OP: +',\n",
+        "    '~' : 'OP: ~',\n",
+        "    'x' : 'OP: x',\n",
+        "    '/' : 'OP: /',\n",
+        "    'is' : 'OP: is'\n",
+        "}\n",
+        "key = {\n",
+        "    'if' : 'KEY: if',\n",
+        "    'then': 'KEY: then',\n",
+        "    'else': 'KEY: else',\n",
+        "    'print': 'KEY: print'\n",
+        "}\n",
+        "\n",
+        "def toke(line):\n",
+        "    tokens = []\n",
+        "    i = 0\n",
+        "    while i < len(line):\n",
+        "        if line[i].isspace():\n",
+        "            i += 1\n",
+        "            continue\n",
+        "        found = False\n",
+        "        for word in ['if', 'then', 'else', 'print', 'is']:\n",
+        "            if line[i:].startswith(word + ' ') or line[i:].startswith(word + '\\n') or line[i:] == word:\n",
+        "                tokens.append(word)\n",
+        "                i += len(word)\n",
+        "                found = True\n",
+        "                break\n",
+        "        if found:\n",
+        "            continue\n",
+        "        if line[i] in '=+~x/':      # check the op\n",
+        "            tokens.append(line[i])\n",
+        "            i += 1\n",
+        "            continue\n",
+        "        token = ''\n",
+        "        while i < len(line) and (line[i].isalnum() or line[i] == '-'):    # identification and number\n",
+        "            token += line[i]\n",
+        "            i += 1\n",
+        "        if token:\n",
+        "            tokens.append(token)\n",
+        "    return tokens\n",
+        "\n",
+        "a = file.read()\n",
+        "lines = a.split('\\n')\n",
+        "\n",
+        "for line in lines:\n",
+        "    tokens = toke(line)\n",
+        "    for token in tokens:\n",
+        "        if token in op:\n",
+        "            print(f\"[{op[token]}]\")\n",
+        "        elif token in key:\n",
+        "            print(f\"[{key[token]}]\")\n",
+        "        elif token.isdigit():\n",
+        "            print(f\"[NUM: {token}]\")\n",
+        "        else:\n",
+        "            print(f\"[ID: {token}]\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "rqjGBglNlFEh",
+        "outputId": "1799b4aa-1ff5-4ec1-f9c8-d741f1b46935"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[ID: 1Pencil]\n",
+            "[OP: =]\n",
+            "[NUM: 1]\n",
+            "[ID: 2Pencil]\n",
+            "[OP: =]\n",
+            "[ID: 1Pencil]\n",
+            "[OP: x]\n",
+            "[NUM: 2]\n",
+            "[KEY: if]\n",
+            "[ID: 1box]\n",
+            "[OP: is]\n",
+            "[NUM: 1]\n",
+            "[KEY: then]\n",
+            "[ID: Pencil-box]\n",
+            "[OP: =]\n",
+            "[ID: 2Pencil]\n",
+            "[OP: +]\n",
+            "[ID: 1box]\n",
+            "[OP: ~]\n",
+            "[ID: 1Pencil]\n",
+            "[KEY: else]\n",
+            "[KEY: print]\n",
+            "[ID: 2Pencil]\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
